@@ -4,14 +4,24 @@
 
 set -euo pipefail
 
-# Log file for debugging
-LOG_FILE="$HOME/.cache/wallpaper-picker.log"
-mkdir -p "$(dirname "$LOG_FILE")"
+# Log directory and file
+LOG_DIR="$HOME/.cache/wallpaper-picker-logs"
+LOG_FILE="$LOG_DIR/wallpaper-picker-$(date '+%Y-%m-%d').log"
+SWAYBG_LOG="$LOG_DIR/swaybg-$(date '+%Y-%m-%d').log"
+mkdir -p "$LOG_DIR"
 
 # Logging function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
 }
+
+# Clean up old log files (keep last 7 days)
+cleanup_old_logs() {
+    find "$LOG_DIR" -name "*.log" -type f -mtime +7 -delete 2>/dev/null || true
+}
+
+# Run cleanup on start
+cleanup_old_logs
 
 log "=== Wallpaper Picker Started ==="
 
@@ -57,10 +67,9 @@ set_wallpaper() {
 
         log "Starting swaybg with: $wallpaper"
         # Start swaybg with output redirected to log
-        local swaybg_log="$HOME/.cache/swaybg.log"
-        nohup swaybg -i "$wallpaper" -m fill >> "$swaybg_log" 2>&1 &
+        nohup swaybg -i "$wallpaper" -m fill >> "$SWAYBG_LOG" 2>&1 &
         local swaybg_pid=$!
-        log "swaybg started with PID: $swaybg_pid, output: $swaybg_log"
+        log "swaybg started with PID: $swaybg_pid, output: $SWAYBG_LOG"
 
         # Give it a moment to start
         sleep 0.5
@@ -70,9 +79,9 @@ set_wallpaper() {
             log "swaybg is running (verified)"
             echo -e "${GREEN}✓ Wallpaper set with swaybg${NC}"
         else
-            log "ERROR: swaybg process died immediately, check $swaybg_log"
+            log "ERROR: swaybg process died immediately, check $SWAYBG_LOG"
             echo -e "${RED}✗ swaybg failed to start${NC}"
-            echo -e "${YELLOW}Check logs: $swaybg_log${NC}"
+            echo -e "${YELLOW}Check logs: $SWAYBG_LOG${NC}"
             return 1
         fi
     elif command -v hyprctl &> /dev/null; then
