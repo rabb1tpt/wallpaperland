@@ -4,24 +4,14 @@
 
 set -euo pipefail
 
-# Log directory and file
-LOG_DIR="$HOME/.cache/wallpaper-picker-logs"
-LOG_FILE="$LOG_DIR/wallpaper-picker-$(date '+%Y-%m-%d').log"
-SWAYBG_LOG="$LOG_DIR/swaybg-$(date '+%Y-%m-%d').log"
-mkdir -p "$LOG_DIR"
+# Log files (auto-cleaned on reboot)
+LOG_FILE="/tmp/wallpaper-picker.log"
+SWAYBG_LOG="/tmp/swaybg.log"
 
 # Logging function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
 }
-
-# Clean up old log files (keep last 7 days)
-cleanup_old_logs() {
-    find "$LOG_DIR" -name "*.log" -type f -mtime +7 -delete 2>/dev/null || true
-}
-
-# Run cleanup on start
-cleanup_old_logs
 
 log "=== Wallpaper Picker Started ==="
 
