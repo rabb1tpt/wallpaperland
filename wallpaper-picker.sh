@@ -133,7 +133,7 @@ main() {
 
     # Find all wallpapers
     log "Searching for wallpapers in: ${WALLPAPER_DIRS[*]}"
-    wallpapers=$(find_wallpapers | sort)
+    wallpapers=$(find_wallpapers | shuf)
 
     if [[ -z "$wallpapers" ]]; then
         log "ERROR: No wallpapers found"
@@ -168,7 +168,7 @@ main() {
     log "Starting fzf selection from tmpdir: $tmpdir"
     log "Files in tmpdir: $(ls "$tmpdir" | wc -l) files"
 
-    selected_basename=$(cd "$tmpdir" && ls | sort | fzf \
+    selected_basename=$(cd "$tmpdir" && ls | shuf | fzf \
         --height=100% \
         --preview="kitty +kitten icat --clear --transfer-mode=memory --stdin=no --place=80x40@0x0 {}" \
         --preview-window=right:60% \
